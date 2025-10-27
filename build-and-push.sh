@@ -38,12 +38,7 @@ gcloud auth configure-docker gcr.io --quiet
 
 # Array of services to build
 declare -a SERVICES=(
-    "user-service"
-    "menu-service"
-    "order-service"
-    "queue-service"
-    "payment-service"
-    "api-gateway"
+
     "frontend"
 )
 

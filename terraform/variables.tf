@@ -93,7 +93,7 @@ variable "tags" {
   description = "Tags to apply to all resources"
   type        = map(string)
   default = {
-    project     = "canteen-queue-manager"
-    managed_by  = "terraform"
+    project    = "canteen-queue-manager"
+    managed_by = "terraform"
   }
 }

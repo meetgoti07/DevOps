@@ -5,6 +5,10 @@
 
 set -e
 
+# Ensure GKE auth plugin is in PATH
+export PATH="${PATH}:/opt/homebrew/share/google-cloud-sdk/bin"
+export USE_GKE_GCLOUD_AUTH_PLUGIN=True
+
 echo "🚀 Starting Kubernetes Deployment for Canteen Queue Manager"
 echo "============================================================="
 
@@ -52,83 +56,49 @@ wait_for_pod() {
 
 # Step 1: Create namespace
 echo "📁 Creating namespace..."
-kubectl apply -f kubernetes/namespace.yaml
+kubectl apply -f namespace.yaml
 echo "✅ Namespace created"
 
 # Step 2: Apply ConfigMap and Secrets
 echo "🔧 Applying configuration..."
-kubectl apply -f kubernetes/configmap.yaml
+kubectl apply -f configmap.yaml
 echo "✅ Configuration applied"
+
+# Step 2.5: Apply Network Policies (skip deprecated PodSecurityPolicy)
+echo "🔒 Applying network policies..."
+kubectl apply -f security-policies.yaml 2>&1 | grep -v "PodSecurityPolicy" || true
+echo "✅ Network policies applied"
 
 # Step 3: Deploy databases first (they need to be ready before services)
 echo "🗄️  Deploying databases..."
 
 echo "   Deploying PostgreSQL..."
-kubectl apply -f kubernetes/postgres.yaml
+kubectl apply -f postgres.yaml
 wait_for_deployment postgres canteen-system
 
 echo "   Deploying MongoDB..."
-kubectl apply -f kubernetes/mongodb.yaml
+kubectl apply -f mongodb.yaml
 wait_for_deployment mongodb canteen-system
 
 echo "   Deploying MySQL..."
-kubectl apply -f kubernetes/mysql.yaml
+kubectl apply -f mysql.yaml
 wait_for_deployment mysql canteen-system
 
 echo "   Deploying Redis..."
-kubectl apply -f kubernetes/redis.yaml
+kubectl apply -f redis.yaml
 wait_for_deployment redis canteen-system
 
 echo "✅ All databases deployed successfully"
 
 # Step 4: Deploy RabbitMQ
 echo "🐰 Deploying RabbitMQ..."
-kubectl apply -f kubernetes/rabbitmq.yaml
+kubectl apply -f rabbitmq.yaml
 wait_for_deployment rabbitmq canteen-system
 echo "✅ RabbitMQ deployed successfully"
 
-# Step 5: Build Docker images (if not already built)
-echo "🐳 Building Docker images..."
-if ! docker image inspect canteen-user-service:latest &> /dev/null; then
-    echo "   Building User Service..."
-    cd user-service && docker build -t canteen-user-service:latest . && cd ..
-fi
-
-if ! docker image inspect canteen-menu-service:latest &> /dev/null; then
-    echo "   Building Menu Service..."
-    cd menu-service && docker build -t canteen-menu-service:latest . && cd ..
-fi
-
-if ! docker image inspect canteen-order-service:latest &> /dev/null; then
-    echo "   Building Order Service..."
-    cd order-service && docker build -t canteen-order-service:latest . && cd ..
-fi
-
-if ! docker image inspect canteen-queue-service:latest &> /dev/null; then
-    echo "   Building Queue Service..."
-    cd queue-service && docker build -t canteen-queue-service:latest . && cd ..
-fi
-
-if ! docker image inspect canteen-payment-service:latest &> /dev/null; then
-    echo "   Building Payment Service..."
-    cd payment-service && docker build -t canteen-payment-service:latest . && cd ..
-fi
-
-if ! docker image inspect canteen-api-gateway:latest &> /dev/null; then
-    echo "   Building API Gateway..."
-    cd api-gateway && docker build -t canteen-api-gateway:latest . && cd ..
-fi
-
-if ! docker image inspect canteen-frontend:latest &> /dev/null; then
-    echo "   Building Frontend..."
-    cd frontend && docker build -t canteen-frontend:latest . && cd ..
-fi
-
-echo "✅ All Docker images ready"
-
-# Step 6: Deploy microservices
+# Step 5: Deploy microservices
 echo "🔧 Deploying microservices..."
-kubectl apply -f kubernetes/microservices.yaml
+kubectl apply -f microservices.yaml
 
 # Wait for each service to be ready
 wait_for_deployment user-service canteen-system
@@ -141,7 +111,7 @@ echo "✅ All microservices deployed successfully"
 
 # Step 7: Deploy API Gateway and Frontend
 echo "🌐 Deploying API Gateway and Frontend..."
-kubectl apply -f kubernetes/frontend-gateway.yaml
+kubectl apply -f frontend-gateway.yaml
 
 wait_for_deployment api-gateway canteen-system
 wait_for_deployment frontend canteen-system

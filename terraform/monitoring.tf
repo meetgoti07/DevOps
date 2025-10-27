@@ -8,8 +8,8 @@ resource "google_monitoring_uptime_check_config" "frontend_uptime" {
   period       = "60s"
 
   http_check {
-    path         = "/"
-    port         = 80
+    path           = "/"
+    port           = 80
     request_method = "GET"
   }
 
@@ -31,13 +31,13 @@ resource "google_monitoring_alert_policy" "high_cpu" {
 
   conditions {
     display_name = "CPU usage above 80%"
-    
+
     condition_threshold {
       filter          = "resource.type=\"k8s_node\" AND metric.type=\"kubernetes.io/node/cpu/allocatable_utilization\""
       duration        = "300s"
       comparison      = "COMPARISON_GT"
       threshold_value = 0.8
-      
+
       aggregations {
         alignment_period   = "60s"
         per_series_aligner = "ALIGN_MEAN"
@@ -65,13 +65,13 @@ resource "google_monitoring_alert_policy" "high_memory" {
 
   conditions {
     display_name = "Memory usage above 85%"
-    
+
     condition_threshold {
       filter          = "resource.type=\"k8s_node\" AND metric.type=\"kubernetes.io/node/memory/allocatable_utilization\""
       duration        = "300s"
       comparison      = "COMPARISON_GT"
       threshold_value = 0.85
-      
+
       aggregations {
         alignment_period   = "60s"
         per_series_aligner = "ALIGN_MEAN"
@@ -99,13 +99,13 @@ resource "google_monitoring_alert_policy" "pod_restarts" {
 
   conditions {
     display_name = "Pod restart count > 5 in 10 minutes"
-    
+
     condition_threshold {
       filter          = "resource.type=\"k8s_container\" AND metric.type=\"kubernetes.io/container/restart_count\""
       duration        = "0s"
       comparison      = "COMPARISON_GT"
       threshold_value = 5
-      
+
       aggregations {
         alignment_period   = "600s"
         per_series_aligner = "ALIGN_DELTA"
@@ -128,20 +128,20 @@ resource "google_monitoring_alert_policy" "pod_restarts" {
 
 # Log-based metric for error rates
 resource "google_logging_metric" "error_count" {
-  count = var.enable_monitoring ? 1 : 0
-  name  = "${var.environment}_error_count"
+  count  = var.enable_monitoring ? 1 : 0
+  name   = "${var.environment}_error_count"
   filter = "severity>=ERROR"
 
   metric_descriptor {
-    metric_kind = "DELTA"
-    value_type  = "INT64"
+    metric_kind  = "DELTA"
+    value_type   = "INT64"
     display_name = "Error Log Count"
   }
 }
 
 # Dashboard for application metrics (JSON configuration)
 resource "google_monitoring_dashboard" "canteen_dashboard" {
-  count          = var.enable_monitoring ? 1 : 0
+  count = var.enable_monitoring ? 1 : 0
   dashboard_json = jsonencode({
     displayName = "${var.environment} Canteen Queue Manager Dashboard"
     mosaicLayout = {

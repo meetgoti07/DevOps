@@ -31,15 +31,18 @@ resource "google_container_cluster" "primary" {
 
   # Enable monitoring and logging
   monitoring_config {
-    enable_components = var.enable_monitoring ? ["SYSTEM_COMPONENTS", "WORKLOADS"] : []
-    
-    managed_prometheus {
-      enabled = var.enable_monitoring
+    enable_components = var.enable_monitoring ? ["SYSTEM_COMPONENTS"] : []
+
+    dynamic "managed_prometheus" {
+      for_each = var.enable_monitoring ? [1] : []
+      content {
+        enabled = true
+      }
     }
   }
 
   logging_config {
-    enable_components = var.enable_monitoring ? ["SYSTEM_COMPONENTS", "WORKLOADS"] : []
+    enable_components = var.enable_monitoring ? ["SYSTEM_COMPONENTS"] : []
   }
 
   # Maintenance window
@@ -47,12 +50,6 @@ resource "google_container_cluster" "primary" {
     daily_maintenance_window {
       start_time = "03:00"
     }
-  }
-
-  # Network policy
-  network_policy {
-    enabled  = true
-    provider = "PROVIDER_UNSPECIFIED"
   }
 
   # Enable addons
