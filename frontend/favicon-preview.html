@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      .canteen-icon {
+        width: 32px;
+        height: 32px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+      }
+      .chef-hat {
+        width: 16px;
+        height: 12px;
+        background: white;
+        border-radius: 8px 8px 0 0;
+        position: relative;
+      }
+      .chef-hat::before {
+        content: "";
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: white;
+        border-radius: 1px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="canteen-icon">
+      <div class="chef-hat"></div>
+    </div>
+  </body>
+</html>

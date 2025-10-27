@@ -1,0 +1,88 @@
+# Dependencies
+node_modules/
+vendor/
+
+# Build artifacts
+target/
+dist/
+build/
+*.class
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+venv/
+env/
+ENV/
+.venv/
+*.egg-info/
+.Python
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+logs/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.swp
+*.swo
+*~
+.settings/
+.classpath
+.project
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Frontend specific
+.next/
+out/
+.cache/
+
+# Compiled binaries
+*.exe
+*.dll
+*.dylib
+
+# Test coverage
+coverage/
+htmlcov/
+.coverage
+*.cover
+
+# Terraform (handled by terraform/.gitignore)
+*.tfstate
+*.tfstate.*
+.terraform/
+
+# Kubernetes secrets (if any)
+*-secret.yaml
+*.key
+*.crt
+*.pem
+
+# Docker
+.dockerignore
+
+# Reports
+report.html

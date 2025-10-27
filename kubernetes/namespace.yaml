@@ -1,0 +1,9 @@
+# Namespace for the canteen application
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: canteen-system
+  labels:
+    name: canteen-system
+    app.kubernetes.io/name: canteen-queue-manager
+    app.kubernetes.io/component: namespace

@@ -1,0 +1,193 @@
+name: Pull Request Validation
+
+on:
+  pull_request:
+    branches: [main, develop]
+    types: [opened, synchronize, reopened]
+
+jobs:
+  # ============================================
+  # Validate PR
+  # ============================================
+  validate-pr:
+    name: Validate Pull Request
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check commit messages
+        uses: wagoid/commitlint-github-action@v5
+
+      - name: Check PR title
+        uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check for large files
+        run: |
+          find . -type f -size +10M -not -path "./.git/*" | while read file; do
+            echo "::error::Large file detected: $file"
+            exit 1
+          done || true
+
+  # ============================================
+  # Code Quality Checks
+  # ============================================
+  code-quality:
+    name: Code Quality
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run super-linter
+        uses: github/super-linter@v5
+        env:
+          DEFAULT_BRANCH: main
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VALIDATE_ALL_CODEBASE: false
+          VALIDATE_JAVASCRIPT_ES: true
+          VALIDATE_TYPESCRIPT_ES: true
+          VALIDATE_PYTHON_PYLINT: true
+          VALIDATE_PYTHON_FLAKE8: true
+          VALIDATE_GO: true
+          VALIDATE_DOCKERFILE: true
+          VALIDATE_YAML: true
+
+  # ============================================
+  # Security Scanning
+  # ============================================
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: "fs"
+          scan-ref: "."
+          format: "table"
+          exit-code: "1"
+          severity: "CRITICAL,HIGH"
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ============================================
+  # Test Coverage
+  # ============================================
+  test-coverage:
+    name: Test Coverage Report
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies (Order Service)
+        working-directory: ./order-service
+        run: |
+          pip install -r requirements.txt
+          pip install pytest pytest-cov
+
+      - name: Run tests with coverage
+        working-directory: ./order-service
+        run: pytest --cov=orders --cov-report=xml --cov-report=html || true
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./order-service/coverage.xml
+          flags: order-service
+          name: order-service-coverage
+
+  # ============================================
+  # Build Test
+  # ============================================
+  build-test:
+    name: Test Builds
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        service:
+          [
+            user-service,
+            menu-service,
+            order-service,
+            queue-service,
+            payment-service,
+            frontend,
+          ]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./${{ matrix.service }}
+          push: false
+          tags: canteen-${{ matrix.service }}:pr-${{ github.event.pull_request.number }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ============================================
+  # Comment on PR
+  # ============================================
+  pr-comment:
+    name: Comment on PR
+    runs-on: ubuntu-latest
+    needs: [validate-pr, code-quality, security-scan, test-coverage, build-test]
+    if: always()
+
+    steps:
+      - name: Comment PR
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const statusEmoji = {
+              'success': '✅',
+              'failure': '❌',
+              'cancelled': '⚠️'
+            };
+
+            const jobs = ${{ toJSON(needs) }};
+            let body = '## PR Validation Results\n\n';
+
+            for (const [job, result] of Object.entries(jobs)) {
+              const emoji = statusEmoji[result.result] || '❓';
+              body += `${emoji} **${job}**: ${result.result}\n`;
+            }
+
+            body += '\n---\n';
+            body += `Commit: ${context.sha.substring(0, 7)}\n`;
+            body += `Author: @${context.payload.pull_request.user.login}`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });

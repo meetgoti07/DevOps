@@ -1,0 +1,94 @@
+# Cloud Storage for application data and backups
+
+# Bucket for application uploads (e.g., menu images)
+resource "google_storage_bucket" "app_storage" {
+  name          = "${var.project_id}-${var.environment}-app-storage"
+  location      = var.region
+  force_destroy = false
+
+  uniform_bucket_level_access = true
+
+  versioning {
+    enabled = true
+  }
+
+  lifecycle_rule {
+    condition {
+      age = 90
+    }
+    action {
+      type = "Delete"
+    }
+  }
+
+  cors {
+    origin          = ["*"]
+    method          = ["GET", "HEAD", "PUT", "POST", "DELETE"]
+    response_header = ["*"]
+    max_age_seconds = 3600
+  }
+
+  labels = var.tags
+}
+
+# Bucket for backups
+resource "google_storage_bucket" "backup_storage" {
+  name          = "${var.project_id}-${var.environment}-backups"
+  location      = var.region
+  force_destroy = false
+
+  uniform_bucket_level_access = true
+
+  versioning {
+    enabled = true
+  }
+
+  lifecycle_rule {
+    condition {
+      age = 30
+    }
+    action {
+      type          = "SetStorageClass"
+      storage_class = "NEARLINE"
+    }
+  }
+
+  lifecycle_rule {
+    condition {
+      age = 180
+    }
+    action {
+      type = "Delete"
+    }
+  }
+
+  labels = var.tags
+}
+
+# Bucket for Terraform state (commented out - create manually first)
+# resource "google_storage_bucket" "terraform_state" {
+#   name          = "${var.project_id}-terraform-state"
+#   location      = var.region
+#   force_destroy = false
+#
+#   uniform_bucket_level_access = true
+#
+#   versioning {
+#     enabled = true
+#   }
+#
+#   labels = var.tags
+# }
+
+# IAM for storage buckets
+resource "google_storage_bucket_iam_member" "app_storage_viewer" {
+  bucket = google_storage_bucket.app_storage.name
+  role   = "roles/storage.objectViewer"
+  member = "serviceAccount:${google_service_account.gke_nodes.email}"
+}
+
+resource "google_storage_bucket_iam_member" "backup_storage_admin" {
+  bucket = google_storage_bucket.backup_storage.name
+  role   = "roles/storage.objectAdmin"
+  member = "serviceAccount:${google_service_account.gke_nodes.email}"
+}

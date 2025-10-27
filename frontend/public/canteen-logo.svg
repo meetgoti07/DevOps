@@ -1,0 +1,29 @@
+<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea"/>
+      <stop offset="100%" style="stop-color:#764ba2"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="20" cy="20" r="18" fill="url(#logoGradient)" stroke="white" stroke-width="2"/>
+  
+  <!-- Chef hat shape -->
+  <path d="M12 16c0-4.4 3.6-8 8-8s8 3.6 8 8c0 1.1-.2 2.1-.6 3l-1.4-1.4c.3-.5.5-1 .5-1.6 0-2.2-1.8-4-4-4s-4 1.8-4 4c0 .6.2 1.1.5 1.6L17.6 19c-.4-.9-.6-1.9-.6-3z" fill="white"/>
+  
+  <!-- Chef hat band -->
+  <rect x="12" y="18" width="16" height="3" rx="1.5" fill="white"/>
+  
+  <!-- Utensils -->
+  <g transform="translate(14, 24)">
+    <!-- Fork -->
+    <path d="M2 0v8M1 0v3M3 0v3" stroke="white" stroke-width="1" stroke-linecap="round"/>
+    
+    <!-- Knife -->
+    <path d="M6 0v8M6 0l2 2" stroke="white" stroke-width="1" stroke-linecap="round"/>
+    
+    <!-- Spoon -->
+    <path d="M10 0c0 1.1-.9 2-2 2s-2-.9-2-2M8 2v6" stroke="white" stroke-width="1" stroke-linecap="round"/>
+  </g>
+</svg>

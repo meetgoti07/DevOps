@@ -1,0 +1,17 @@
+GCP Setup Configuration
+========================
+
+Project ID: canteen-qm-1761557373
+Project Name: Canteen Queue Manager
+Region: us-central1
+Zone: us-central1-a
+Service Account: github-actions@canteen-qm-1761557373.iam.gserviceaccount.com
+Key File: /Users/meetgoti/gcp-github-actions-key.json
+
+Setup Date: Mon Oct 27 15:02:14 IST 2025
+
+GitHub Secrets Required:
+- GCP_PROJECT_ID: canteen-qm-1761557373
+- GCP_SA_KEY: (contents of /Users/meetgoti/gcp-github-actions-key.json)
+
+Next Steps: See DEPLOYMENT_GUIDE.md

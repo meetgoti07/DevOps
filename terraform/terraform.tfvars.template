@@ -1,0 +1,39 @@
+# Terraform Variables for Canteen Queue Manager
+# Copy this file to terraform.tfvars and update with your values
+
+# GCP Project Configuration
+project_id          = "your-gcp-project-id"           # Your GCP project ID
+region              = "us-central1"                    # GCP region
+zone                = "us-central1-a"                  # GCP zone
+environment         = "production"                     # Environment name
+
+# GKE Cluster Configuration
+cluster_name        = "canteen-gke-cluster"            # Name of the GKE cluster
+node_count          = 3                                # Initial number of nodes
+node_machine_type   = "e2-standard-4"                  # Machine type (2 vCPUs, 16 GB memory)
+min_node_count      = 2                                # Minimum nodes for autoscaling
+max_node_count      = 5                                # Maximum nodes for autoscaling
+disk_size_gb        = 50                               # Disk size per node in GB
+
+# Feature Flags
+enable_monitoring   = true                             # Enable GCP monitoring and logging
+enable_backup       = true                             # Enable automated database backups
+
+# Database Configuration
+database_tier       = "db-f1-micro"                    # Cloud SQL tier (micro for dev, higher for prod)
+
+# Redis Configuration
+redis_memory_size_gb = 1                               # Redis memory in GB
+
+# Resource Tags
+tags = {
+  project     = "canteen-queue-manager"
+  managed_by  = "terraform"
+  environment = "production"
+}
+
+# Notes:
+# - For production, consider using larger machine types (e2-standard-8 or higher)
+# - For production databases, use db-n1-standard-1 or higher
+# - Adjust min/max_node_count based on expected load
+# - All values can be customized based on your requirements and budget

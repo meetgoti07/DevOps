@@ -1,0 +1,33 @@
+# Example Terraform Variables
+# Copy this file to terraform.tfvars and update with your values
+
+project_id = "your-gcp-project-id"
+region     = "us-central1"
+zone       = "us-central1-a"
+
+environment = "dev"
+
+# GKE Configuration
+cluster_name      = "canteen-gke-cluster"
+node_count        = 3
+node_machine_type = "e2-standard-4"
+min_node_count    = 2
+max_node_count    = 5
+disk_size_gb      = 50
+
+# Database Configuration
+database_tier        = "db-f1-micro"  # Use db-n1-standard-1 for production
+redis_memory_size_gb = 1
+
+# Feature Flags
+enable_private_cluster = false
+enable_monitoring      = true
+enable_backup          = true
+
+# Tags
+tags = {
+  project     = "canteen-queue-manager"
+  environment = "dev"
+  managed_by  = "terraform"
+  team        = "cloud-team"
+}

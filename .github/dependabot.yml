@@ -1,0 +1,208 @@
+# Dependabot Configuration
+# Automated dependency updates and security alerts
+
+version: 2
+updates:
+  # Frontend (Next.js)
+  - package-ecosystem: "npm"
+    directory: "/frontend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "cloud-team"
+    labels:
+      - "dependencies"
+      - "frontend"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    versioning-strategy: increase
+
+  # Menu Service (Node.js)
+  - package-ecosystem: "npm"
+    directory: "/menu-service"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "cloud-team"
+    labels:
+      - "dependencies"
+      - "menu-service"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+  # Order Service (Python)
+  - package-ecosystem: "pip"
+    directory: "/order-service"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "cloud-team"
+    labels:
+      - "dependencies"
+      - "order-service"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+  # Payment Service (Python)
+  - package-ecosystem: "pip"
+    directory: "/payment-service"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "cloud-team"
+    labels:
+      - "dependencies"
+      - "payment-service"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+  # Queue Service (Go)
+  - package-ecosystem: "gomod"
+    directory: "/queue-service"
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "cloud-team"
+    labels:
+      - "dependencies"
+      - "queue-service"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+  # User Service (Maven)
+  - package-ecosystem: "maven"
+    directory: "/user-service"
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "cloud-team"
+    labels:
+      - "dependencies"
+      - "user-service"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+  # Docker images
+  - package-ecosystem: "docker"
+    directory: "/user-service"
+    schedule:
+      interval: "weekly"
+      day: "thursday"
+      time: "09:00"
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+      - "docker"
+
+  - package-ecosystem: "docker"
+    directory: "/menu-service"
+    schedule:
+      interval: "weekly"
+      day: "thursday"
+      time: "09:00"
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+      - "docker"
+
+  - package-ecosystem: "docker"
+    directory: "/order-service"
+    schedule:
+      interval: "weekly"
+      day: "thursday"
+      time: "09:00"
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+      - "docker"
+
+  - package-ecosystem: "docker"
+    directory: "/queue-service"
+    schedule:
+      interval: "weekly"
+      day: "thursday"
+      time: "09:00"
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+      - "docker"
+
+  - package-ecosystem: "docker"
+    directory: "/payment-service"
+    schedule:
+      interval: "weekly"
+      day: "thursday"
+      time: "09:00"
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+      - "docker"
+
+  - package-ecosystem: "docker"
+    directory: "/frontend"
+    schedule:
+      interval: "weekly"
+      day: "thursday"
+      time: "09:00"
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+      - "docker"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "friday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "cloud-team"
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+
+  # Terraform
+  - package-ecosystem: "terraform"
+    directory: "/terraform"
+    schedule:
+      interval: "monthly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 3
+    reviewers:
+      - "cloud-team"
+    labels:
+      - "dependencies"
+      - "terraform"
+    commit-message:
+      prefix: "infra"
+      include: "scope"
