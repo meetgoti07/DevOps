@@ -174,7 +174,7 @@ jobs:
           sarif_file: checkov-results.sarif
 
       - name: Run tfsec
-        uses: aquasecurity/tfsec-action@v1.0.0
+        uses: aquasecurity/tfsec-action@v1.0.3
         with:
           working_directory: terraform
           soft_fail: true
