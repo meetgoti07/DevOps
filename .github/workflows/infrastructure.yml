@@ -94,6 +94,14 @@ jobs:
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
+      - name: Set up Cloud SDK
+        if: steps.check-gcp.outputs.has-credentials == 'true'
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Save GCP credentials to file
+        if: steps.check-gcp.outputs.has-credentials == 'true'
+        run: echo '${{ secrets.GCP_SA_KEY }}' > ${{ github.workspace }}/gcp-key.json
+
       - name: Terraform Init
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform init -backend=false
@@ -103,7 +111,7 @@ jobs:
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform plan -out=tfplan
         env:
-          TF_VAR_project_id: ${{ secrets.GCP_PROJECT_ID }}
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/gcp-key.json
 
       - name: Terraform Plan (local only)
         if: steps.check-gcp.outputs.has-credentials == 'false'
@@ -150,9 +158,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: terraform-plan
     if: |
-      ((github.event_name == 'push' && github.ref == 'refs/heads/main') ||
-       (github.event_name == 'workflow_dispatch')) &&
-      (secrets.GCP_SA_KEY != '' && secrets.GCP_PROJECT_ID != '')
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'apply')
     environment:
       name: production
       url: https://console.cloud.google.com
@@ -160,6 +167,15 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Verify GCP Credentials
+        run: |
+          if [ -z "${{ secrets.GCP_SA_KEY }}" ] || [ -z "${{ secrets.GCP_PROJECT_ID }}" ]; then
+            echo "Error: GCP credentials not configured"
+            echo "Please set GCP_SA_KEY and GCP_PROJECT_ID secrets"
+            exit 1
+          fi
+          echo "GCP credentials verified"
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -171,21 +187,20 @@ jobs:
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
       - name: Terraform Init
         working-directory: ${{ env.TF_WORKING_DIR }}
-        run: terraform init
+        run: terraform init -backend=false
 
-      - name: Download plan artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: terraform-plan
-          path: ${{ env.TF_WORKING_DIR }}
+      - name: Terraform Plan
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform plan -out=tfplan
 
       - name: Terraform Apply
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform apply -auto-approve tfplan
-        env:
-          TF_VAR_project_id: ${{ secrets.GCP_PROJECT_ID }}
 
       - name: Save Terraform outputs
         working-directory: ${{ env.TF_WORKING_DIR }}
@@ -239,8 +254,7 @@ jobs:
       needs.kubernetes-validate.result == 'success' &&
       (needs.terraform-apply.result == 'success' || needs.terraform-apply.result == 'skipped') &&
       (github.event_name == 'push' && github.ref == 'refs/heads/main' ||
-       github.event_name == 'workflow_dispatch') &&
-      secrets.GCP_SA_KEY != ''
+       github.event_name == 'workflow_dispatch')
 
     steps:
       - name: Checkout code
