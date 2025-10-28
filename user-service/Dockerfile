@@ -1,5 +1,5 @@
 # Multi-stage build for Java Spring Boot application
-FROM eclipse-temurin:17-jdk-jammy AS builder
+FROM eclipse-temurin:25-jdk-jammy AS builder
 WORKDIR /app
 
 # Copy Maven wrapper and pom.xml
@@ -17,7 +17,7 @@ COPY src src
 RUN ./mvnw package -DskipTests
 
 # Runtime stage
-FROM eclipse-temurin:17-jre-jammy
+FROM eclipse-temurin:25-jre-jammy
 WORKDIR /app
 
 # Copy the built JAR from builder stage
