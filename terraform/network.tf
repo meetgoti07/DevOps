@@ -109,7 +109,7 @@ resource "google_compute_firewall" "allow_ssh" {
     ports    = ["22"]
   }
 
-  # IMPORTANT: Update this to restrict SSH to specific IPs (e.g., your office, VPN, or bastion host)
-  source_ranges = ["0.0.0.0/0"]  # Change this to specific IPs in production
+  # Restrict SSH to internal network. Update this to specific IPs in production (e.g., bastion host, VPN)
+  source_ranges = ["10.0.0.0/8"]
   target_tags   = ["ssh"]
 }

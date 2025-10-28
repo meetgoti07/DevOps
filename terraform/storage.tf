@@ -136,6 +136,10 @@ resource "google_storage_bucket" "backup_logs_archive" {
     enabled = true
   }
 
+  logging {
+    log_bucket = google_storage_bucket.archive_access_logs.name
+  }
+
   lifecycle_rule {
     condition {
       age = 180
@@ -146,6 +150,8 @@ resource "google_storage_bucket" "backup_logs_archive" {
   }
 
   labels = var.tags
+
+  depends_on = [google_storage_bucket.archive_access_logs]
 }
 
 resource "google_storage_bucket" "app_logs_archive" {
@@ -161,9 +167,41 @@ resource "google_storage_bucket" "app_logs_archive" {
     enabled = true
   }
 
+  logging {
+    log_bucket = google_storage_bucket.archive_access_logs.name
+  }
+
   lifecycle_rule {
     condition {
       age = 180
+    }
+    action {
+      type = "Delete"
+    }
+  }
+
+  labels = var.tags
+
+  depends_on = [google_storage_bucket.archive_access_logs]
+}
+
+# Bucket for archive access logs
+resource "google_storage_bucket" "archive_access_logs" {
+  name          = "${var.project_id}-${var.environment}-archive-access-logs"
+  location      = var.region
+  force_destroy = false
+
+  uniform_bucket_level_access = true
+
+  public_access_prevention = "enforced"
+
+  versioning {
+    enabled = true
+  }
+
+  lifecycle_rule {
+    condition {
+      age = 90
     }
     action {
       type = "Delete"

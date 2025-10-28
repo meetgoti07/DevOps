@@ -26,6 +26,7 @@ resource "google_container_cluster" "primary" {
       cidr_block   = "0.0.0.0/0"
       display_name = "All public IPs (Update to restrict in production)"
     }
+    gcp_public_cidrs_access_enabled = false
   }
 
   depends_on = [
@@ -73,6 +74,11 @@ resource "google_container_cluster" "primary" {
   # Release channel for automatic updates
   release_channel {
     channel = "REGULAR"
+  }
+
+  # Enable Network Policy
+  network_policy {
+    enabled = true
   }
 
   # Enable addons

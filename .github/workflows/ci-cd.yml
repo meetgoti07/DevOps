@@ -398,7 +398,7 @@ jobs:
             --project=${{ env.GCP_PROJECT_ID }} \
             --substitutions=SHORT_SHA=${{ github.sha }}
 
-      - name: Fallback: Set up Docker Buildx (if Cloud Build fails)
+      - name: "Fallback: Set up Docker Buildx (if Cloud Build fails)"
         if: steps.cloud-build.outcome == 'failure'
         uses: docker/setup-buildx-action@v3
 

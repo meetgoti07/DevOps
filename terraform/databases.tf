@@ -1,7 +1,7 @@
 # Cloud SQL (PostgreSQL) for User Service
 resource "google_sql_database_instance" "postgres" {
   name             = "${var.environment}-canteen-postgres"
-  database_version = "POSTGRES_15"
+  database_version = "POSTGRES_16"
   region           = var.region
 
   depends_on = [google_service_networking_connection.private_vpc_connection]
@@ -13,6 +13,7 @@ resource "google_sql_database_instance" "postgres" {
       ipv4_enabled    = false
       private_network = google_compute_network.vpc.id
       ssl_mode        = "ENCRYPTED_ONLY"
+      require_ssl     = true
     }
 
     backup_configuration {
@@ -72,6 +73,11 @@ resource "google_sql_database_instance" "postgres" {
     }
 
     database_flags {
+      name  = "log_min_error_statement"
+      value = "ERROR"
+    }
+
+    database_flags {
       name  = "log_lock_waits"
       value = "on"
     }
@@ -122,6 +128,7 @@ resource "google_sql_database_instance" "mysql" {
       ipv4_enabled    = false
       private_network = google_compute_network.vpc.id
       ssl_mode        = "ENCRYPTED_ONLY"
+      require_ssl     = true
     }
 
     backup_configuration {
