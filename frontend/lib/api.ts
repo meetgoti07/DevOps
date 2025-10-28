@@ -1,7 +1,7 @@
 import axios, { AxiosResponse, AxiosError } from "axios";
 
 // API Gateway URL - hardcoded for production
-const API_GATEWAY_URL = "http://136.113.85.233";
+const API_GATEWAY_URL = "http://34.45.51.113";
 
 // Service URLs - all go through API Gateway
 const USER_SERVICE_URL = API_GATEWAY_URL;

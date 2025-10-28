@@ -114,6 +114,9 @@ resource "google_container_cluster" "primary" {
 
   # Resource labels
   resource_labels = var.tags
+
+  # Enable deletion without protection
+  deletion_protection = false
 }
 
 # Primary node pool

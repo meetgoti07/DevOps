@@ -509,14 +509,10 @@ jobs:
           # Deploy/Update frontend and gateway
           kubectl apply -f frontend-gateway.yaml
 
-          # Update image tags to use specific commit SHA (first 7 chars)
-          SHORT_SHA=${{ github.sha }}
-          SHORT_SHA=${SHORT_SHA:0:7}
-
+          # Update image tags to use latest (which is pushed by Cloud Build)
           for service in user-service menu-service order-service queue-service payment-service frontend api-gateway; do
-            # Use short SHA tag
             kubectl set image deployment/$service \
-              $service=gcr.io/${{ env.GCP_PROJECT_ID }}/canteen-$service:$SHORT_SHA \
+              $service=gcr.io/${{ env.GCP_PROJECT_ID }}/canteen-$service:latest \
               -n canteen-system || true
           done
 
