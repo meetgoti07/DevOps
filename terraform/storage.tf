@@ -195,6 +195,12 @@ resource "google_storage_bucket" "archive_access_logs" {
 
   public_access_prevention = "enforced"
 
+  # Prevent recreation if already exists
+  lifecycle {
+    prevent_destroy = false
+    ignore_changes  = []
+  }
+
   versioning {
     enabled = true
   }

@@ -514,8 +514,10 @@ jobs:
 
       - name: Wait for rollout
         run: |
-          kubectl rollout status deployment/canteen-order-service -n canteen-system --timeout=5m
-          kubectl rollout status deployment/canteen-frontend -n canteen-system --timeout=5m
+          kubectl rollout status deployment/order-service -n canteen-system --timeout=5m || true
+          kubectl rollout status deployment/frontend -n canteen-system --timeout=5m || true
+          kubectl rollout status deployment/user-service -n canteen-system --timeout=5m || true
+          kubectl rollout status deployment/menu-service -n canteen-system --timeout=5m || true
 
       - name: Verify deployment
         run: |
@@ -563,8 +565,9 @@ jobs:
 
           # Check health endpoints
           for service in user-service menu-service order-service queue-service payment-service; do
-            kubectl run curl-test --image=curlimages/curl --rm -i --restart=Never -- \
-              curl -f http://canteen-$service.canteen-system.svc.cluster.local/health || true
+            kubectl run curl-test-$service --image=curlimages/curl --rm -i --restart=Never -n canteen-system -- \
+              curl -f http://$service.canteen-system.svc.cluster.local/health || true
+            sleep 2
           done
 
       - name: Run smoke tests

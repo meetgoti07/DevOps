@@ -112,6 +112,7 @@ jobs:
         run: |
           terraform plan \
             -var="project_id=${{ secrets.GCP_PROJECT_ID }}" \
+            -var="enable_monitoring=false" \
             -out=tfplan
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/gcp-key.json
@@ -202,6 +203,7 @@ jobs:
         run: |
           terraform plan \
             -var="project_id=${{ secrets.GCP_PROJECT_ID }}" \
+            -var="enable_monitoring=false" \
             -out=tfplan
 
       - name: Terraform Apply

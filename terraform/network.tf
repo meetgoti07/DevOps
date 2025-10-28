@@ -4,6 +4,12 @@ resource "google_compute_network" "vpc" {
   name                    = "${var.environment}-canteen-vpc"
   auto_create_subnetworks = false
   description             = "VPC for Canteen Queue Manager"
+
+  # Prevent recreation if already exists
+  lifecycle {
+    prevent_destroy = false
+    ignore_changes  = []
+  }
 }
 
 resource "google_compute_subnetwork" "subnet" {

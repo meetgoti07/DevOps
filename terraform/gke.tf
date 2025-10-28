@@ -139,7 +139,8 @@ resource "google_container_node_pool" "primary_nodes" {
     disk_type    = "pd-standard"
 
     # Service account with minimal permissions
-    service_account = google_service_account.gke_nodes.email
+    # Using default GKE service account instead of custom SA
+    # service_account = google_service_account.gke_nodes.email
     oauth_scopes = [
       "https://www.googleapis.com/auth/cloud-platform"
     ]
@@ -179,29 +180,32 @@ resource "google_container_node_pool" "primary_nodes" {
 }
 
 # Service account for GKE nodes
-resource "google_service_account" "gke_nodes" {
-  account_id   = "${var.environment}-gke-nodes-sa"
-  display_name = "Service Account for GKE Nodes"
-}
+# Commented out - requires iam.serviceAccounts.create permission
+# Using default GKE service account instead
+# resource "google_service_account" "gke_nodes" {
+#   account_id   = "${var.environment}-gke-nodes-sa"
+#   display_name = "Service Account for GKE Nodes"
+# }
 
 # IAM bindings for service account
-resource "google_project_iam_member" "gke_nodes_log_writer" {
-  project = var.project_id
-  role    = "roles/logging.logWriter"
-  member  = "serviceAccount:${google_service_account.gke_nodes.email}"
-}
+# Commented out - using default service account
+# resource "google_project_iam_member" "gke_nodes_log_writer" {
+#   project = var.project_id
+#   role    = "roles/logging.logWriter"
+#   member  = "serviceAccount:${google_service_account.gke_nodes.email}"
+# }
 
-resource "google_project_iam_member" "gke_nodes_metric_writer" {
-  project = var.project_id
-  role    = "roles/monitoring.metricWriter"
-  member  = "serviceAccount:${google_service_account.gke_nodes.email}"
-}
+# resource "google_project_iam_member" "gke_nodes_metric_writer" {
+#   project = var.project_id
+#   role    = "roles/monitoring.metricWriter"
+#   member  = "serviceAccount:${google_service_account.gke_nodes.email}"
+# }
 
-resource "google_project_iam_member" "gke_nodes_monitoring_viewer" {
-  project = var.project_id
-  role    = "roles/monitoring.viewer"
-  member  = "serviceAccount:${google_service_account.gke_nodes.email}"
-}
+# resource "google_project_iam_member" "gke_nodes_monitoring_viewer" {
+#   project = var.project_id
+#   role    = "roles/monitoring.viewer"
+#   member  = "serviceAccount:${google_service_account.gke_nodes.email}"
+# }
 
 resource "google_project_iam_member" "gke_nodes_resource_metadata_writer" {
   project = var.project_id
