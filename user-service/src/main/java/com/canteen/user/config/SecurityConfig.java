@@ -44,13 +44,17 @@ public class SecurityConfig {
                                 mvcMatcherBuilder.pattern("/api/auth/register"),
                                 mvcMatcherBuilder.pattern("/api/auth/register/"),
                                 mvcMatcherBuilder.pattern("/api/auth/login"),
-                                mvcMatcherBuilder.pattern("/api/auth/login/")
+                                mvcMatcherBuilder.pattern("/api/auth/login/"),
+                                mvcMatcherBuilder.pattern("/actuator/health"),
+                                mvcMatcherBuilder.pattern("/actuator/health/"),
+                                mvcMatcherBuilder.pattern("/health"),
+                                mvcMatcherBuilder.pattern("/health/")
                         ).permitAll()
                         .requestMatchers(
                                 mvcMatcherBuilder.pattern("/api/auth/profile"),
                                 mvcMatcherBuilder.pattern("/api/auth/profile/")
                         ).authenticated()
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
@@ -63,7 +67,7 @@ public class SecurityConfig {
         configuration.setAllowedOriginPatterns(Arrays.asList("*"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
-        configuration.setAllowCredentials(true);
+        configuration.setAllowCredentials(false); // Set to false when using wildcard origins
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

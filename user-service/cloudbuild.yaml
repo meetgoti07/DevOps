@@ -1,0 +1,18 @@
+steps:
+  - name: "gcr.io/cloud-builders/mvn"
+    args: ["clean", "package", "-DskipTests"]
+
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      - "build"
+      - "--platform=linux/amd64"
+      - "-t"
+      - "gcr.io/$PROJECT_ID/canteen-user-service:latest"
+      - "."
+
+images:
+  - "gcr.io/$PROJECT_ID/canteen-user-service:latest"
+
+options:
+  machineType: "N1_HIGHCPU_8"
+  logging: CLOUD_LOGGING_ONLY

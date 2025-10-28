@@ -1,11 +1,14 @@
-import axios, { AxiosResponse, AxiosError } from 'axios';
+import axios, { AxiosResponse, AxiosError } from "axios";
 
-// Service URLs
-const USER_SERVICE_URL = process.env.NEXT_PUBLIC_USER_SERVICE_URL || 'http://localhost:8081';
-const MENU_SERVICE_URL = process.env.NEXT_PUBLIC_MENU_SERVICE_URL || 'http://localhost:8082';
-const ORDER_SERVICE_URL = process.env.NEXT_PUBLIC_ORDER_SERVICE_URL || 'http://localhost:8083';
-const QUEUE_SERVICE_URL = process.env.NEXT_PUBLIC_QUEUE_SERVICE_URL || 'http://localhost:8084';
-const PAYMENT_SERVICE_URL = process.env.NEXT_PUBLIC_PAYMENT_SERVICE_URL || 'http://localhost:8085';
+// API Gateway URL - hardcoded for production
+const API_GATEWAY_URL = "http://136.113.85.233";
+
+// Service URLs - all go through API Gateway
+const USER_SERVICE_URL = API_GATEWAY_URL;
+const MENU_SERVICE_URL = API_GATEWAY_URL;
+const ORDER_SERVICE_URL = API_GATEWAY_URL;
+const QUEUE_SERVICE_URL = API_GATEWAY_URL;
+const PAYMENT_SERVICE_URL = API_GATEWAY_URL;
 
 // Create axios instances for each service
 const createApiInstance = (baseURL: string) => {
@@ -13,15 +16,15 @@ const createApiInstance = (baseURL: string) => {
     baseURL,
     timeout: 10000,
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
   });
 
   // Request interceptor to add auth token
   instance.interceptors.request.use(
     (config) => {
-      if (typeof window !== 'undefined') {
-        const token = localStorage.getItem('token');
+      if (typeof window !== "undefined") {
+        const token = localStorage.getItem("token");
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
@@ -41,10 +44,10 @@ const createApiInstance = (baseURL: string) => {
     (error: AxiosError) => {
       if (error.response?.status === 401) {
         // Token expired or invalid
-        if (typeof window !== 'undefined') {
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          window.location.href = '/login';
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          window.location.href = "/login";
         }
       }
       return Promise.reject(error);

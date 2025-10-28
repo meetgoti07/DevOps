@@ -13,9 +13,7 @@ import {
   Edit,
   Shield,
   ShieldCheck,
-  Mail,
   Phone,
-  Calendar,
 } from "lucide-react";
 import { User } from "@/lib/types";
 import { toast } from "sonner";
@@ -25,35 +23,23 @@ const mockUsers: User[] = [
   {
     id: 1,
     email: "admin@canteen.com",
-    username: "admin",
-    firstName: "Admin",
-    lastName: "User",
-    phoneNumber: "+1234567890",
+    fullName: "Admin User",
+    phone: "+1234567890",
     role: "ADMIN",
-    createdAt: "2024-01-15T10:00:00Z",
-    updatedAt: "2024-01-15T10:00:00Z",
   },
   {
     id: 2,
     email: "staff@canteen.com",
-    username: "staff1",
-    firstName: "Staff",
-    lastName: "Member",
-    phoneNumber: "+1234567891",
-    role: "ADMIN", // Using ADMIN as STAFF since backend only has CUSTOMER/ADMIN
-    createdAt: "2024-01-16T10:00:00Z",
-    updatedAt: "2024-01-16T10:00:00Z",
+    fullName: "Staff Member",
+    phone: "+1234567891",
+    role: "STAFF",
   },
   {
     id: 3,
     email: "john.doe@student.edu",
-    username: "johndoe",
-    firstName: "John",
-    lastName: "Doe",
-    phoneNumber: "+1234567892",
+    fullName: "John Doe",
+    phone: "+1234567892",
     role: "CUSTOMER",
-    createdAt: "2024-01-17T10:00:00Z",
-    updatedAt: "2024-01-17T10:00:00Z",
   },
   // Add more mock users...
 ];
@@ -90,9 +76,7 @@ export default function AdminUsersPage() {
     if (searchTerm) {
       filtered = filtered.filter(
         (user) =>
-          user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          user.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
           user.email.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
@@ -109,7 +93,6 @@ export default function AdminUsersPage() {
             ? {
                 ...user,
                 role: newRole as any,
-                updatedAt: new Date().toISOString(),
               }
             : user
         )
@@ -282,35 +265,25 @@ export default function AdminUsersPage() {
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
                         <span className="font-semibold text-primary">
-                          {user.firstName[0]}
-                          {user.lastName[0]}
+                          {user.fullName.split(' ').map(n => n[0]).join('')}
                         </span>
                       </div>
 
                       <div>
                         <h3 className="font-semibold text-lg">
-                          {user.firstName} {user.lastName}
+                          {user.fullName}
                         </h3>
                         <p className="text-sm text-muted-foreground">
-                          @{user.username}
+                          {user.email}
                         </p>
 
                         <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                          <div className="flex items-center gap-1">
-                            <Mail className="h-4 w-4" />
-                            {user.email}
-                          </div>
-                          {user.phoneNumber && (
+                          {user.phone && (
                             <div className="flex items-center gap-1">
                               <Phone className="h-4 w-4" />
-                              {user.phoneNumber}
+                              {user.phone}
                             </div>
                           )}
-                          <div className="flex items-center gap-1">
-                            <Calendar className="h-4 w-4" />
-                            Joined{" "}
-                            {new Date(user.createdAt).toLocaleDateString()}
-                          </div>
                         </div>
                       </div>
                     </div>

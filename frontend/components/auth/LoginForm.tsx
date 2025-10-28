@@ -48,17 +48,26 @@ export function LoginForm() {
 
     try {
       const response = await authApi.login(formData);
-      
+
+      // Create user object from response
+      const user = {
+        id: response.id,
+        email: response.email,
+        fullName: response.fullName,
+        phone: response.phone,
+        role: response.role,
+      };
+
       // Use flushSync to force the state update to be synchronous
       flushSync(() => {
-        login(response.token, response.user);
+        login(response.token, user);
       });
-      
+
       toast.success("Login successful!");
-      
+
       // Navigate immediately after the synchronous state update
       router.replace("/menu");
-      
+
     } catch (error: any) {
       const message =
         error.response?.data?.message || "Login failed. Please try again.";

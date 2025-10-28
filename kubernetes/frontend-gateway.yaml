@@ -92,7 +92,7 @@ spec:
             - containerPort: 3000
           env:
             - name: NEXT_PUBLIC_API_URL
-              value: "http://api-gateway"
+              value: "" # Empty string uses relative URLs (same domain as frontend)
           resources:
             requests:
               memory: "512Mi"

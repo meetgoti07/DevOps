@@ -9,18 +9,20 @@ export interface ApiResponse<T = any> {
 export interface User {
   id: number;
   email: string;
-  username: string;
-  firstName: string;
-  lastName: string;
-  phoneNumber?: string;
+  fullName: string;
+  phone?: string;
   role: "CUSTOMER" | "ADMIN" | "STAFF";
-  createdAt: string;
-  updatedAt: string;
 }
 
 export interface AuthResponse {
   token: string;
-  user: User;
+  type: string;
+  id: number;
+  email: string;
+  fullName: string;
+  phone?: string;
+  role: "CUSTOMER" | "ADMIN" | "STAFF";
+  user?: User; // For backward compatibility
 }
 
 export interface LoginRequest {
@@ -30,19 +32,14 @@ export interface LoginRequest {
 
 export interface RegisterRequest {
   email: string;
-  username: string;
-  firstName: string;
-  lastName: string;
-  phoneNumber?: string;
   password: string;
-  confirmPassword: string;
+  fullName: string;
+  phone?: string;
 }
 
 export interface UpdateProfileRequest {
-  firstName?: string;
-  lastName?: string;
-  phoneNumber?: string;
-  email?: string;
+  fullName?: string;
+  phone?: string;
 }
 
 // Menu Types

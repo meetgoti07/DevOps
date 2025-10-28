@@ -16,10 +16,9 @@ import { Eye, EyeOff, Loader2 } from 'lucide-react';
 export function RegisterForm() {
   const [formData, setFormData] = useState({
     email: '',
-    username: '',
     firstName: '',
     lastName: '',
-    phoneNumber: '',
+    phone: '',
     password: '',
     confirmPassword: '',
   });
@@ -37,24 +36,46 @@ export function RegisterForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (formData.password !== formData.confirmPassword) {
       toast.error('Passwords do not match');
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      toast.error('Password must be at least 6 characters');
       return;
     }
 
     setIsLoading(true);
 
     try {
-      const response = await authApi.register(formData);
-      
+      // Transform form data to match backend API
+      const registerData = {
+        email: formData.email,
+        password: formData.password,
+        fullName: `${formData.firstName} ${formData.lastName}`.trim(),
+        phone: formData.phone || '',
+      };
+
+      const response = await authApi.register(registerData);
+
+      // Create user object from response
+      const user = {
+        id: response.id,
+        email: response.email,
+        fullName: response.fullName,
+        phone: response.phone,
+        role: response.role,
+      };
+
       // Use flushSync to force the state update to be synchronous
       flushSync(() => {
-        login(response.token, response.user);
+        login(response.token, user);
       });
-      
+
       toast.success('Registration successful!');
-      
+
       // Navigate immediately after the synchronous state update
       router.replace('/menu');
     } catch (error: any) {
@@ -104,19 +125,6 @@ export function RegisterForm() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
-              <Input
-                id="username"
-                name="username"
-                value={formData.username}
-                onChange={handleInputChange}
-                placeholder="johndoe"
-                required
-                disabled={isLoading}
-              />
-            </div>
-            
-            <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
@@ -131,12 +139,12 @@ export function RegisterForm() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="phoneNumber">Phone Number (Optional)</Label>
+              <Label htmlFor="phone">Phone Number (Optional)</Label>
               <Input
-                id="phoneNumber"
-                name="phoneNumber"
+                id="phone"
+                name="phone"
                 type="tel"
-                value={formData.phoneNumber}
+                value={formData.phone}
                 onChange={handleInputChange}
                 placeholder="+1 234 567 8900"
                 disabled={isLoading}

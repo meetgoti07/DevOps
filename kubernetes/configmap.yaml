@@ -9,7 +9,7 @@ data:
   POSTGRES_DB: "userdb"
   POSTGRES_USER: "admin"
   POSTGRES_PASSWORD: "admin123"
-  MONGODB_URI: "mongodb://mongodb:27017/menudb"
+  MONGODB_URI: "mongodb://admin:admin123@mongodb:27017/menudb?authSource=admin"
   MYSQL_DATABASE: "orderdb"
   MYSQL_USER: "admin"
   MYSQL_PASSWORD: "admin123"
