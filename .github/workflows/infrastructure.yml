@@ -120,6 +120,7 @@ jobs:
         run: |
           terraform plan \
             -var="project_id=${{ secrets.GCP_PROJECT_ID }}" \
+            -var="environment=production" \
             -var="enable_monitoring=false" \
             -out=tfplan
         env:
@@ -211,6 +212,7 @@ jobs:
         run: |
           terraform plan \
             -var="project_id=${{ secrets.GCP_PROJECT_ID }}" \
+            -var="environment=production" \
             -var="enable_monitoring=false" \
             -out=tfplan
 
