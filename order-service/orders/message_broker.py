@@ -2,6 +2,7 @@ import pika
 import json
 import logging
 import threading
+from datetime import datetime
 from django.conf import settings
 from typing import Dict, Any, Callable
 
@@ -56,7 +57,7 @@ class RabbitMQService:
                 properties=pika.BasicProperties(
                     delivery_mode=2,  # Make message persistent
                     content_type='application/json',
-                    timestamp=pika.spec.BasicProperties.timestamp
+                    timestamp=int(datetime.now().timestamp() * 1000)
                 )
             )
             

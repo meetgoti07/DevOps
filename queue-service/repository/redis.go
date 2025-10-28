@@ -40,33 +40,33 @@ func NewRedisRepository(redisURL string) *RedisRepository {
 }
 
 func (r *RedisRepository) AddToQueue(orderID, userID int) (*models.QueueItem, error) {
-	// Generate queue number
-	queueNumber, err := r.client.Incr(r.ctx, "queue:counter").Result()
-	if err != nil {
-		return nil, fmt.Errorf("failed to generate queue number: %v", err)
-	}
-
-	// Calculate estimated wait time (5 minutes per order ahead)
-	activeCount, _ := r.GetActiveOrdersCount()
-	estimatedWaitTime := activeCount * 5
-
-	queueItem := &models.QueueItem{
-		OrderID:           orderID,
-		UserID:            userID,
-		QueueNumber:       int(queueNumber),
-		EstimatedWaitTime: estimatedWaitTime,
-		Status:           models.StatusWaiting,
-		CreatedAt:        time.Now(),
-	}
-
-	// Add to sorted set with timestamp as score
-	score := float64(time.Now().Unix())
-	err = r.client.ZAdd(r.ctx, "queue:active", &redis.Z{
+	// Add to sorted set with timestamp as score (this determines queue order)
+	score := float64(time.Now().UnixNano()) // Use nanoseconds for more precision
+	err := r.client.ZAdd(r.ctx, "queue:active", &redis.Z{
 		Score:  score,
 		Member: strconv.Itoa(orderID),
 	}).Err()
 	if err != nil {
 		return nil, fmt.Errorf("failed to add to active queue: %v", err)
+	}
+
+	// Get position in queue (this becomes the queue number)
+	position, err := r.getQueuePosition(orderID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get queue position: %v", err)
+	}
+	queueNumber := position + 1 // Queue numbers are 1-indexed
+
+	// Calculate estimated wait time (5 minutes per order ahead)
+	estimatedWaitTime := position * 5
+
+	queueItem := &models.QueueItem{
+		OrderID:           orderID,
+		UserID:            userID,
+		QueueNumber:       queueNumber,
+		EstimatedWaitTime: estimatedWaitTime,
+		Status:           models.StatusWaiting,
+		CreatedAt:        time.Now(),
 	}
 
 	// Store order details
@@ -97,7 +97,7 @@ func (r *RedisRepository) AddToQueue(orderID, userID int) (*models.QueueItem, er
 
 func (r *RedisRepository) GetQueueItem(orderID int) (*models.QueueItem, error) {
 	queueKey := fmt.Sprintf("queue:order:%d", orderID)
-	
+
 	data, err := r.client.HGet(r.ctx, queueKey, "data").Result()
 	if err != nil {
 		if err == redis.Nil {
@@ -112,9 +112,10 @@ func (r *RedisRepository) GetQueueItem(orderID int) (*models.QueueItem, error) {
 		return nil, fmt.Errorf("failed to unmarshal queue item: %v", err)
 	}
 
-	// Update estimated wait time based on current position
+	// Update queue number and wait time based on current position
 	position, err := r.getQueuePosition(orderID)
 	if err == nil {
+		queueItem.QueueNumber = position + 1      // Queue numbers are 1-indexed
 		queueItem.EstimatedWaitTime = position * 5
 	}
 

@@ -75,9 +75,12 @@ class OrderService:
                     'created_at': order.created_at.isoformat()
                 }
                 
+                # Add order to queue immediately
+                OrderService._add_to_queue(order.id, user_id)
+
                 # Publish order created event
                 publish_order_event('order_created', **order_data)
-                
+
                 # Initiate payment asynchronously
                 publish_order_event(
                     'payment_initiated',
@@ -85,10 +88,7 @@ class OrderService:
                     user_id=order.user_id,
                     amount=order.total_amount
                 )
-                
-                # Don't add to queue immediately - wait for payment confirmation
-                # Queue will be added when status changes to 'confirmed' via message
-                
+
                 return order
                 
         except Exception as e:
@@ -185,13 +185,10 @@ class OrderService:
             )
             
             # Handle specific status transitions asynchronously
-            if new_status == 'confirmed' and old_status == 'placed':
-                # When order is confirmed (payment successful), add to queue
-                logger.info(f"Order {order_id} confirmed - will be added to queue via message")
-                
-            elif new_status == 'completed':
-                # When order is completed, remove from queue
-                logger.info(f"Order {order_id} completed - will be removed from queue via message")
+            if new_status == 'completed' or new_status == 'cancelled':
+                # When order is completed or cancelled, remove from queue
+                OrderService._remove_from_queue(order_id)
+                logger.info(f"Order {order_id} {new_status} - removed from queue")
             
             return order
             
