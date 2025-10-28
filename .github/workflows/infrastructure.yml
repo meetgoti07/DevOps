@@ -117,7 +117,7 @@ jobs:
           TF_VAR_project_id: ${{ secrets.GCP_PROJECT_ID }}
 
       - name: Upload plan
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: terraform-plan
           path: ${{ env.TF_WORKING_DIR }}/tfplan
@@ -192,7 +192,7 @@ jobs:
           terraform output -json > terraform-outputs.json
 
       - name: Upload outputs
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: terraform-outputs
           path: ${{ env.TF_WORKING_DIR }}/terraform-outputs.json

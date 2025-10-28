@@ -56,6 +56,36 @@ resource "google_sql_database_instance" "postgres" {
       value = "on"
     }
 
+    database_flags {
+      name  = "log_statement"
+      value = "all"
+    }
+
+    database_flags {
+      name  = "log_hostname"
+      value = "on"
+    }
+
+    database_flags {
+      name  = "log_min_messages"
+      value = "ERROR"
+    }
+
+    database_flags {
+      name  = "log_lock_waits"
+      value = "on"
+    }
+
+    database_flags {
+      name  = "shared_preload_libraries"
+      value = "pgaudit"
+    }
+
+    database_flags {
+      name  = "pgaudit.log"
+      value = "ALL"
+    }
+
     insights_config {
       query_insights_enabled  = true
       query_string_length     = 1024
@@ -151,10 +181,14 @@ resource "google_redis_instance" "redis" {
   memory_size_gb = var.redis_memory_size_gb
   region         = var.region
   redis_version  = "REDIS_7_0"
-  tier           = "BASIC"
+  tier           = "STANDARD_HA"
 
   authorized_network = google_compute_network.vpc.id
   connect_mode       = "DIRECT_PEERING"
+
+  transit_encryption_mode = "SERVER_AUTHENTICATION"
+  auth_enabled            = true
+  auth_string             = random_password.redis_password.result
 
   depends_on = [google_service_networking_connection.private_vpc_connection]
 
@@ -207,5 +241,10 @@ resource "random_password" "postgres_password" {
 
 resource "random_password" "mysql_password" {
   length  = 16
+  special = true
+}
+
+resource "random_password" "redis_password" {
+  length  = 32
   special = true
 }

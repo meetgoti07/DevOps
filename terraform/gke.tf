@@ -13,6 +13,21 @@ resource "google_container_cluster" "primary" {
   network    = google_compute_network.vpc.name
   subnetwork = google_compute_subnetwork.subnet.name
 
+  # Private cluster configuration
+  private_cluster_config {
+    enable_private_nodes    = true
+    enable_private_endpoint = false
+    master_ipv4_cidr_block  = "172.16.0.0/28"
+  }
+
+  # Master authorized networks (restrict API access)
+  master_authorized_networks_config {
+    cidr_blocks {
+      cidr_block   = "0.0.0.0/0"
+      display_name = "All public IPs (Update to restrict in production)"
+    }
+  }
+
   depends_on = [
     google_compute_network.vpc,
     google_compute_subnetwork.subnet
@@ -31,7 +46,7 @@ resource "google_container_cluster" "primary" {
 
   # Enable monitoring and logging
   monitoring_config {
-    enable_components = var.enable_monitoring ? ["SYSTEM_COMPONENTS"] : []
+    enable_components = var.enable_monitoring ? ["SYSTEM_COMPONENTS", "WORKLOADS"] : []
 
     dynamic "managed_prometheus" {
       for_each = var.enable_monitoring ? [1] : []
@@ -42,14 +57,22 @@ resource "google_container_cluster" "primary" {
   }
 
   logging_config {
-    enable_components = var.enable_monitoring ? ["SYSTEM_COMPONENTS"] : []
+    enable_components = var.enable_monitoring ? ["SYSTEM_COMPONENTS", "WORKLOADS"] : []
   }
+
+  # Enable intranode visibility and VPC flow logs
+  enable_intranode_visibility = true
 
   # Maintenance window
   maintenance_policy {
     daily_maintenance_window {
       start_time = "03:00"
     }
+  }
+
+  # Release channel for automatic updates
+  release_channel {
+    channel = "REGULAR"
   }
 
   # Enable addons
@@ -76,6 +99,16 @@ resource "google_container_cluster" "primary" {
     client_certificate_config {
       issue_client_certificate = false
     }
+  }
+
+  # Binary Authorization
+  binary_authorization {
+    evaluation_mode = "PROJECT_SINGLETON_POLICY_ENFORCE"
+  }
+
+  # Metadata server configuration
+  metadata_config {
+    node_metadata = "GKE_METADATA"
   }
 
   # Resource labels

@@ -14,6 +14,10 @@ resource "google_storage_bucket" "backup_logging" {
     enabled = true
   }
 
+  logging {
+    log_bucket = google_storage_bucket.backup_logs_archive.name
+  }
+
   lifecycle_rule {
     condition {
       age = 90
@@ -40,6 +44,10 @@ resource "google_storage_bucket" "app_storage" {
     enabled = true
   }
 
+  logging {
+    log_bucket = google_storage_bucket.app_logs_archive.name
+  }
+
   lifecycle_rule {
     condition {
       age = 90
@@ -50,9 +58,9 @@ resource "google_storage_bucket" "app_storage" {
   }
 
   cors {
-    origin          = ["*"]
+    origin          = ["https://*"]
     method          = ["GET", "HEAD", "PUT", "POST", "DELETE"]
-    response_header = ["*"]
+    response_header = ["Content-Type", "Authorization"]
     max_age_seconds = 3600
   }
 
@@ -113,6 +121,57 @@ resource "google_storage_bucket" "backup_storage" {
 #
 #   labels = var.tags
 # }
+
+# Archive buckets for logs
+resource "google_storage_bucket" "backup_logs_archive" {
+  name          = "${var.project_id}-${var.environment}-backup-logs-archive"
+  location      = var.region
+  force_destroy = false
+
+  uniform_bucket_level_access = true
+
+  public_access_prevention = "enforced"
+
+  versioning {
+    enabled = true
+  }
+
+  lifecycle_rule {
+    condition {
+      age = 180
+    }
+    action {
+      type = "Delete"
+    }
+  }
+
+  labels = var.tags
+}
+
+resource "google_storage_bucket" "app_logs_archive" {
+  name          = "${var.project_id}-${var.environment}-app-logs-archive"
+  location      = var.region
+  force_destroy = false
+
+  uniform_bucket_level_access = true
+
+  public_access_prevention = "enforced"
+
+  versioning {
+    enabled = true
+  }
+
+  lifecycle_rule {
+    condition {
+      age = 180
+    }
+    action {
+      type = "Delete"
+    }
+  }
+
+  labels = var.tags
+}
 
 # IAM for storage buckets
 resource "google_storage_bucket_iam_member" "app_storage_viewer" {

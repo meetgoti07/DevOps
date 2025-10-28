@@ -12,6 +12,8 @@ resource "google_compute_subnetwork" "subnet" {
   region        = var.region
   network       = google_compute_network.vpc.id
 
+  private_ip_google_access = true
+
   secondary_ip_range {
     range_name    = "services-range"
     ip_cidr_range = "10.1.0.0/20"
@@ -20,6 +22,12 @@ resource "google_compute_subnetwork" "subnet" {
   secondary_ip_range {
     range_name    = "pod-ranges"
     ip_cidr_range = "10.2.0.0/16"
+  }
+
+  log_config {
+    aggregation_interval = "INTERVAL_5_SEC"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
   }
 }
 
@@ -72,10 +80,23 @@ resource "google_compute_firewall" "allow_http_https" {
 
   allow {
     protocol = "tcp"
-    ports    = ["80", "443", "8080"]
+    ports    = ["443"]
   }
 
   source_ranges = ["0.0.0.0/0"]
+  target_tags   = ["web"]
+}
+
+resource "google_compute_firewall" "allow_http_internal" {
+  name    = "${var.environment}-allow-http-internal"
+  network = google_compute_network.vpc.name
+
+  allow {
+    protocol = "tcp"
+    ports    = ["80", "8080"]
+  }
+
+  source_ranges = ["10.0.0.0/8"]
   target_tags   = ["web"]
 }
 
@@ -88,6 +109,7 @@ resource "google_compute_firewall" "allow_ssh" {
     ports    = ["22"]
   }
 
-  source_ranges = ["0.0.0.0/0"]
+  # IMPORTANT: Update this to restrict SSH to specific IPs (e.g., your office, VPN, or bastion host)
+  source_ranges = ["0.0.0.0/0"]  # Change this to specific IPs in production
   target_tags   = ["ssh"]
 }
