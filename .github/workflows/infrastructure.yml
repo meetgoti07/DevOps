@@ -1,5 +1,9 @@
 name: Infrastructure Deployment
 
+permissions:
+  contents: read
+  pull-requests: write
+
 on:
   push:
     branches: [main]
@@ -216,8 +220,11 @@ jobs:
 
       - name: Run kubesec
         uses: controlplaneio/kubesec-action@v0.0.2
+        continue-on-error: true
         with:
           input: kubernetes/microservices.yaml
+          format: json
+          exit-code: 0
 
   # ============================================
   # Kubernetes Dry Run

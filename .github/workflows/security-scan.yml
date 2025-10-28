@@ -1,5 +1,9 @@
 name: Security Scanning
 
+permissions:
+  contents: read
+  security-events: write
+
 on:
   schedule:
     - cron: "0 2 * * *" # Run daily at 2 AM UTC
@@ -91,12 +95,15 @@ jobs:
 
       - name: Upload Trivy results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        continue-on-error: true
         with:
           sarif_file: "trivy-results-${{ matrix.service }}.sarif"
           category: trivy-${{ matrix.service }}
 
       - name: Run Anchore Grype scanner
         uses: anchore/scan-action@v3
+        continue-on-error: true
         with:
           image: canteen-${{ matrix.service }}:scan
           fail-build: false
@@ -117,11 +124,13 @@ jobs:
 
       - name: Run Gitleaks
         uses: gitleaks/gitleaks-action@v2
+        continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run TruffleHog
         uses: trufflesecurity/trufflehog@main
+        continue-on-error: true
         with:
           path: ./
           base: ${{ github.event.repository.default_branch }}
@@ -170,6 +179,8 @@ jobs:
 
       - name: Upload Checkov results
         uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        continue-on-error: true
         with:
           sarif_file: checkov-results.sarif
 

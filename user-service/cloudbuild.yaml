@@ -8,11 +8,15 @@ steps:
       - "--platform=linux/amd64"
       - "-t"
       - "gcr.io/$PROJECT_ID/canteen-user-service:latest"
+      - "-t"
+      - "gcr.io/$PROJECT_ID/canteen-user-service:$SHORT_SHA"
       - "."
 
 images:
   - "gcr.io/$PROJECT_ID/canteen-user-service:latest"
+  - "gcr.io/$PROJECT_ID/canteen-user-service:$SHORT_SHA"
 
 options:
   machineType: "N1_HIGHCPU_8"
   logging: CLOUD_LOGGING_ONLY
+  substitution_option: "ALLOW_LOOSE"

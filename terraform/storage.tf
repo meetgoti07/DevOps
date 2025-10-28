@@ -1,5 +1,31 @@
 # Cloud Storage for application data and backups
 
+# Bucket for storing logs from backup bucket
+resource "google_storage_bucket" "backup_logging" {
+  name          = "${var.project_id}-${var.environment}-backup-logs"
+  location      = var.region
+  force_destroy = false
+
+  uniform_bucket_level_access = true
+
+  public_access_prevention = "enforced"
+
+  versioning {
+    enabled = true
+  }
+
+  lifecycle_rule {
+    condition {
+      age = 90
+    }
+    action {
+      type = "Delete"
+    }
+  }
+
+  labels = var.tags
+}
+
 # Bucket for application uploads (e.g., menu images)
 resource "google_storage_bucket" "app_storage" {
   name          = "${var.project_id}-${var.environment}-app-storage"
@@ -7,6 +33,8 @@ resource "google_storage_bucket" "app_storage" {
   force_destroy = false
 
   uniform_bucket_level_access = true
+
+  public_access_prevention = "enforced"
 
   versioning {
     enabled = true
@@ -39,6 +67,8 @@ resource "google_storage_bucket" "backup_storage" {
 
   uniform_bucket_level_access = true
 
+  public_access_prevention = "enforced"
+
   versioning {
     enabled = true
   }
@@ -60,6 +90,10 @@ resource "google_storage_bucket" "backup_storage" {
     action {
       type = "Delete"
     }
+  }
+
+  logging {
+    log_bucket = google_storage_bucket.backup_logging.name
   }
 
   labels = var.tags

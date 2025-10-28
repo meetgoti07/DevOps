@@ -4,14 +4,14 @@ steps:
       - "build"
       - "--platform=linux/amd64"
       - "-t"
-      - "gcr.io/$PROJECT_ID/canteen-order-service:latest"
+      - "gcr.io/$PROJECT_ID/canteen-menu-service:latest"
       - "-t"
-      - "gcr.io/$PROJECT_ID/canteen-order-service:$SHORT_SHA"
+      - "gcr.io/$PROJECT_ID/canteen-menu-service:$SHORT_SHA"
       - "."
 
 images:
-  - "gcr.io/$PROJECT_ID/canteen-order-service:latest"
-  - "gcr.io/$PROJECT_ID/canteen-order-service:$SHORT_SHA"
+  - "gcr.io/$PROJECT_ID/canteen-menu-service:latest"
+  - "gcr.io/$PROJECT_ID/canteen-menu-service:$SHORT_SHA"
 
 options:
   machineType: "N1_HIGHCPU_8"

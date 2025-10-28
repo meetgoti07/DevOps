@@ -5,11 +5,21 @@ steps:
       - "--platform=linux/amd64"
       - "-t"
       - "gcr.io/$PROJECT_ID/canteen-frontend:latest"
+      - "-t"
+      - "gcr.io/$PROJECT_ID/canteen-frontend:$SHORT_SHA"
       - "."
+    env:
+      - "NEXT_PUBLIC_USER_SERVICE_URL=http://user-service:8081"
+      - "NEXT_PUBLIC_MENU_SERVICE_URL=http://menu-service:8082"
+      - "NEXT_PUBLIC_ORDER_SERVICE_URL=http://order-service:8083"
+      - "NEXT_PUBLIC_QUEUE_SERVICE_URL=http://queue-service:8084"
+      - "NEXT_PUBLIC_PAYMENT_SERVICE_URL=http://payment-service:8085"
 
 images:
   - "gcr.io/$PROJECT_ID/canteen-frontend:latest"
+  - "gcr.io/$PROJECT_ID/canteen-frontend:$SHORT_SHA"
 
 options:
   machineType: "N1_HIGHCPU_8"
   logging: CLOUD_LOGGING_ONLY
+  substitution_option: "ALLOW_LOOSE"
