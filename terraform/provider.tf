@@ -13,11 +13,11 @@ terraform {
     }
   }
 
-  # Optional: Configure remote backend for state management
-  # backend "gcs" {
-  #   bucket = "canteen-terraform-state"
-  #   prefix = "terraform/state"
-  # }
+  # Remote backend for state management
+  backend "gcs" {
+    bucket = "canteen-terraform-state-bucket"
+    prefix = "terraform/state"
+  }
 }
 
 provider "google" {

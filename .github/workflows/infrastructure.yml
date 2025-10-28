@@ -56,7 +56,7 @@ jobs:
 
       - name: Terraform Init
         working-directory: ${{ env.TF_WORKING_DIR }}
-        run: terraform init -backend=false
+        run: terraform init
 
       - name: Terraform Validate
         working-directory: ${{ env.TF_WORKING_DIR }}
@@ -104,7 +104,7 @@ jobs:
 
       - name: Terraform Init
         working-directory: ${{ env.TF_WORKING_DIR }}
-        run: terraform init -backend=false
+        run: terraform init
 
       - name: Terraform Plan (with GCP)
         if: steps.check-gcp.outputs.has-credentials == 'true'
@@ -196,7 +196,7 @@ jobs:
 
       - name: Terraform Init
         working-directory: ${{ env.TF_WORKING_DIR }}
-        run: terraform init -backend=false
+        run: terraform init
 
       - name: Terraform Plan
         working-directory: ${{ env.TF_WORKING_DIR }}
