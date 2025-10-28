@@ -195,7 +195,6 @@ resource "google_redis_instance" "redis" {
 
   transit_encryption_mode = "SERVER_AUTHENTICATION"
   auth_enabled            = true
-  auth_string             = random_password.redis_password.result
 
   depends_on = [google_service_networking_connection.private_vpc_connection]
 
@@ -248,10 +247,5 @@ resource "random_password" "postgres_password" {
 
 resource "random_password" "mysql_password" {
   length  = 16
-  special = true
-}
-
-resource "random_password" "redis_password" {
-  length  = 32
   special = true
 }

@@ -112,11 +112,6 @@ resource "google_container_cluster" "primary" {
     evaluation_mode = "PROJECT_SINGLETON_POLICY_ENFORCE"
   }
 
-  # Metadata server configuration
-  metadata_config {
-    node_metadata = "GKE_METADATA"
-  }
-
   # Resource labels
   resource_labels = var.tags
 }
