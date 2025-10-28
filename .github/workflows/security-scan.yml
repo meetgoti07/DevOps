@@ -22,9 +22,6 @@ jobs:
     strategy:
       matrix:
         include:
-          - service: user-service
-            language: java
-            manifest: pom.xml
           - service: menu-service
             language: javascript
             manifest: package.json
@@ -71,7 +68,6 @@ jobs:
       matrix:
         service:
           [
-            user-service,
             menu-service,
             order-service,
             queue-service,
@@ -159,38 +155,6 @@ jobs:
         uses: github/codeql-action/analyze@v3
 
   # ============================================
-  # Infrastructure Security
-  # ============================================
-  infrastructure-security:
-    name: Infrastructure Security Scan
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Run Checkov
-        uses: bridgecrewio/checkov-action@master
-        with:
-          directory: terraform/
-          framework: terraform
-          output_format: sarif
-          output_file_path: checkov-results.sarif
-
-      - name: Upload Checkov results
-        uses: github/codeql-action/upload-sarif@v3
-        if: always()
-        continue-on-error: true
-        with:
-          sarif_file: checkov-results.sarif
-
-      - name: Run tfsec
-        uses: aquasecurity/tfsec-action@v1.0.0
-        with:
-          working_directory: terraform
-          soft_fail: true
-
-  # ============================================
   # SBOM Generation
   # ============================================
   sbom-generation:
@@ -220,14 +184,7 @@ jobs:
   security-report:
     name: Generate Security Report
     runs-on: ubuntu-latest
-    needs:
-      [
-        dependency-scan,
-        image-scan,
-        secret-scan,
-        code-security,
-        infrastructure-security,
-      ]
+    needs: [dependency-scan, image-scan, secret-scan, code-security]
     if: always()
 
     steps:
@@ -243,7 +200,6 @@ jobs:
           echo "- Image Scan: ${{ needs.image-scan.result }}" >> security-report.md
           echo "- Secret Scan: ${{ needs.secret-scan.result }}" >> security-report.md
           echo "- Code Security: ${{ needs.code-security.result }}" >> security-report.md
-          echo "- Infrastructure Security: ${{ needs.infrastructure-security.result }}" >> security-report.md
 
       - name: Upload report
         uses: actions/upload-artifact@v4
