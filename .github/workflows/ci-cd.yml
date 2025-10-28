@@ -180,7 +180,10 @@ jobs:
         with:
           node-version: "18"
           cache: "npm"
-          cache-dependency-path: menu-service/package-lock.json
+          cache-dependency-path: |
+            menu-service/package-lock.json
+            menu-service/pnpm-lock.yaml
+            menu-service/yarn.lock
 
       - name: Install pnpm
         uses: pnpm/action-setup@v2

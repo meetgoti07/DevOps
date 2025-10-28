@@ -48,7 +48,10 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
-          cache-dependency-path: ${{ matrix.service }}/package-lock.json
+          cache-dependency-path: |
+            ${{ matrix.service }}/package-lock.json
+            ${{ matrix.service }}/pnpm-lock.yaml
+            ${{ matrix.service }}/yarn.lock
 
       - name: Setup Go
         if: matrix.language == 'go'

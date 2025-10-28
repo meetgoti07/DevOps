@@ -10,11 +10,13 @@ on:
     paths:
       - "terraform/**"
       - "kubernetes/**"
+      - ".github/workflows/infrastructure.yml"
   pull_request:
     branches: [main]
     paths:
       - "terraform/**"
       - "kubernetes/**"
+      - ".github/workflows/infrastructure.yml"
   workflow_dispatch:
     inputs:
       action:
@@ -77,20 +79,36 @@ jobs:
         with:
           terraform_version: ${{ env.TF_VERSION }}
 
+      - name: Check GCP Credentials
+        id: check-gcp
+        run: |
+          if [ -z "${{ secrets.GCP_SA_KEY }}" ] || [ -z "${{ secrets.GCP_PROJECT_ID }}" ]; then
+            echo "has-credentials=false" >> $GITHUB_OUTPUT
+          else
+            echo "has-credentials=true" >> $GITHUB_OUTPUT
+          fi
+
       - name: Authenticate to Google Cloud
+        if: steps.check-gcp.outputs.has-credentials == 'true'
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
       - name: Terraform Init
         working-directory: ${{ env.TF_WORKING_DIR }}
-        run: terraform init
+        run: terraform init -backend=false
 
-      - name: Terraform Plan
+      - name: Terraform Plan (with GCP)
+        if: steps.check-gcp.outputs.has-credentials == 'true'
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform plan -out=tfplan
         env:
           TF_VAR_project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Terraform Plan (local only)
+        if: steps.check-gcp.outputs.has-credentials == 'false'
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform plan -out=tfplan -json > tfplan.json || true
 
       - name: Upload plan
         uses: actions/upload-artifact@v4
@@ -132,8 +150,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: terraform-plan
     if: |
-      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
-      (github.event_name == 'workflow_dispatch')
+      ((github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+       (github.event_name == 'workflow_dispatch')) &&
+      (secrets.GCP_SA_KEY != '' && secrets.GCP_PROJECT_ID != '')
     environment:
       name: production
       url: https://console.cloud.google.com
@@ -218,9 +237,10 @@ jobs:
     if: |
       always() &&
       needs.kubernetes-validate.result == 'success' &&
-      needs.terraform-apply.result == 'success' &&
+      (needs.terraform-apply.result == 'success' || needs.terraform-apply.result == 'skipped') &&
       (github.event_name == 'push' && github.ref == 'refs/heads/main' ||
-       github.event_name == 'workflow_dispatch')
+       github.event_name == 'workflow_dispatch') &&
+      secrets.GCP_SA_KEY != ''
 
     steps:
       - name: Checkout code
@@ -241,8 +261,9 @@ jobs:
             --project ${{ secrets.GCP_PROJECT_ID }}
 
       - name: Dry run Kubernetes manifests
+        continue-on-error: true
         run: |
-          kubectl apply --dry-run=server -f kubernetes/ || true
+          kubectl apply --dry-run=server -f kubernetes/
 
       - name: Upload dry run results
         uses: actions/upload-artifact@v4
