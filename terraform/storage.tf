@@ -218,14 +218,15 @@ resource "google_storage_bucket" "archive_access_logs" {
 }
 
 # IAM for storage buckets
-resource "google_storage_bucket_iam_member" "app_storage_viewer" {
-  bucket = google_storage_bucket.app_storage.name
-  role   = "roles/storage.objectViewer"
-  member = "serviceAccount:${google_service_account.gke_nodes.email}"
-}
+# Commented out - using default GKE service account
+# resource "google_storage_bucket_iam_member" "app_storage_viewer" {
+#   bucket = google_storage_bucket.app_storage.name
+#   role   = "roles/storage.objectViewer"
+#   member = "serviceAccount:${google_service_account.gke_nodes.email}"
+# }
 
-resource "google_storage_bucket_iam_member" "backup_storage_admin" {
-  bucket = google_storage_bucket.backup_storage.name
-  role   = "roles/storage.objectAdmin"
-  member = "serviceAccount:${google_service_account.gke_nodes.email}"
-}
+# resource "google_storage_bucket_iam_member" "backup_storage_admin" {
+#   bucket = google_storage_bucket.backup_storage.name
+#   role   = "roles/storage.objectAdmin"
+#   member = "serviceAccount:${google_service_account.gke_nodes.email}"
+# }

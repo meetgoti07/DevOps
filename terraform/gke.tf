@@ -207,8 +207,8 @@ resource "google_container_node_pool" "primary_nodes" {
 #   member  = "serviceAccount:${google_service_account.gke_nodes.email}"
 # }
 
-resource "google_project_iam_member" "gke_nodes_resource_metadata_writer" {
-  project = var.project_id
-  role    = "roles/stackdriver.resourceMetadata.writer"
-  member  = "serviceAccount:${google_service_account.gke_nodes.email}"
-}
+# resource "google_project_iam_member" "gke_nodes_resource_metadata_writer" {
+#   project = var.project_id
+#   role    = "roles/stackdriver.resourceMetadata.writer"
+#   member  = "serviceAccount:${google_service_account.gke_nodes.email}"
+# }

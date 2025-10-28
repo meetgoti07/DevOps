@@ -105,10 +105,10 @@ output "subnet_name" {
   value       = google_compute_subnetwork.subnet.name
 }
 
-output "gke_service_account" {
-  description = "Service account for GKE nodes"
-  value       = google_service_account.gke_nodes.email
-}
+# output "gke_service_account" {
+#   description = "Service account for GKE nodes"
+#   value       = google_service_account.gke_nodes.email
+# }
 
 output "kubectl_config_command" {
   description = "Command to configure kubectl"
