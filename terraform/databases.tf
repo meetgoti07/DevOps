@@ -13,7 +13,7 @@ resource "google_sql_database_instance" "postgres" {
       ipv4_enabled    = false
       private_network = google_compute_network.vpc.id
       ssl_mode        = "ENCRYPTED_ONLY"
-      require_ssl     = true
+      require_ssl     = false
     }
 
     backup_configuration {
@@ -128,7 +128,7 @@ resource "google_sql_database_instance" "mysql" {
       ipv4_enabled    = false
       private_network = google_compute_network.vpc.id
       ssl_mode        = "ENCRYPTED_ONLY"
-      require_ssl     = true
+      require_ssl     = false
     }
 
     backup_configuration {
@@ -215,6 +215,13 @@ resource "google_redis_instance" "redis" {
   labels = var.tags
 }
 
+# Enable Service Networking API first
+resource "google_project_service" "servicenetworking" {
+  service = "servicenetworking.googleapis.com"
+
+  disable_on_destroy = false
+}
+
 # Private Service Connection for Cloud SQL
 resource "google_compute_global_address" "private_ip_address" {
   name          = "${var.environment}-private-ip-address"
@@ -222,6 +229,8 @@ resource "google_compute_global_address" "private_ip_address" {
   address_type  = "INTERNAL"
   prefix_length = 16
   network       = google_compute_network.vpc.id
+
+  depends_on = [google_project_service.servicenetworking]
 }
 
 resource "google_service_networking_connection" "private_vpc_connection" {
@@ -229,14 +238,10 @@ resource "google_service_networking_connection" "private_vpc_connection" {
   service                 = "servicenetworking.googleapis.com"
   reserved_peering_ranges = [google_compute_global_address.private_ip_address.name]
 
-  depends_on = [google_compute_global_address.private_ip_address]
-}
-
-# Enable Service Networking API
-resource "google_project_service" "servicenetworking" {
-  service = "servicenetworking.googleapis.com"
-
-  disable_on_destroy = false
+  depends_on = [
+    google_compute_global_address.private_ip_address,
+    google_project_service.servicenetworking
+  ]
 }
 
 # Random passwords for databases
