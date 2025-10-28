@@ -33,26 +33,6 @@ output "kubernetes_cluster_host" {
   sensitive   = true
 }
 
-output "postgres_connection_name" {
-  description = "PostgreSQL Cloud SQL connection name"
-  value       = google_sql_database_instance.postgres.connection_name
-}
-
-output "postgres_private_ip" {
-  description = "PostgreSQL private IP address"
-  value       = google_sql_database_instance.postgres.private_ip_address
-}
-
-output "postgres_username" {
-  description = "PostgreSQL username"
-  value       = google_sql_user.postgres_user.name
-}
-
-output "postgres_password" {
-  description = "PostgreSQL password"
-  value       = random_password.postgres_password.result
-  sensitive   = true
-}
 
 output "mysql_connection_name" {
   description = "MySQL Cloud SQL connection name"
